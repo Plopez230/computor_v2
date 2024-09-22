@@ -6,7 +6,7 @@
 #    By: plopez-b <plopez-b@student.42malaga.com    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/09/21 02:27:59 by plopez-b          #+#    #+#              #
-#    Updated: 2024/09/21 17:28:03 by plopez-b         ###   ########.fr        #
+#    Updated: 2024/09/22 01:31:11 by plopez-b         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -21,6 +21,7 @@ tokens = (
     'TIMESMATRIX',
     'DIVIDE',
     'POWER',
+    'POWERMATRIX',
     'MODULUS',
     'ASSIGNMENT',
     # PARENTHESIS
@@ -36,11 +37,13 @@ tokens = (
     'IDENTIFIER',
     # RESERVED WORDS
     'IMAGINARY',
+    'TYPE',
 )
 
 # Reserved words 
 reserved = {
     'i' : 'IMAGINARY',
+    'type': 'TYPE',
 }
 
 # Regular expression rules for simple tokens
@@ -50,6 +53,7 @@ t_TIMES         = r'\*'
 t_TIMESMATRIX   = r'\*\*'
 t_DIVIDE        = r'/'
 t_POWER         = r'\^'
+t_POWERMATRIX   = r'\^\^'
 t_MODULUS       = r'\%'
 t_ASSIGNMENT    = r'\='
 t_LPAREN        = r'\('
