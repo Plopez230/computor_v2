@@ -6,16 +6,20 @@
 #    By: plopez-b <plopez-b@student.42malaga.com    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/09/21 17:25:26 by plopez-b          #+#    #+#              #
-#    Updated: 2024/09/23 03:09:32 by plopez-b         ###   ########.fr        #
+#    Updated: 2024/09/23 04:40:20 by plopez-b         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 import math
 from copy import deepcopy
+from exceptions import *
 
 
-class MathError(Exception):
-    pass
+variable = "y"
+
+def set_variable(name):
+    global variable
+    variable = name
 
 
 def join_sum_terms(terms):
@@ -644,6 +648,7 @@ class Polynomial(Function):
         return result
     
     def _repr_term(self, term):
+        global variable
         c = term[1]
         e = term[0]
         r = []
@@ -654,11 +659,11 @@ class Polynomial(Function):
                 r.append(f"{c}")
         if e != Complex(1, 0) and e != Complex(0, 0):
             if (e.print_terms() > 1):
-                r.append(f"x^({e})")
+                r.append(f"{variable}^({e})")
             else:
-                r.append(f"x^{e}")
+                r.append(f"{variable}^{e}")
         elif e != Complex(0, 0):
-            r.append("x")
+            r.append(f"{variable}")
         if not r:
             r = ["1.0"]
         return " * ".join(r)
