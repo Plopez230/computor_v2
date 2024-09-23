@@ -6,11 +6,11 @@
 #    By: plopez-b <plopez-b@student.42malaga.com    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/09/23 04:32:33 by plopez-b          #+#    #+#              #
-#    Updated: 2024/09/23 04:40:46 by plopez-b         ###   ########.fr        #
+#    Updated: 2024/09/23 04:51:54 by plopez-b         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-from objects import Complex, Polynomial, set_variable
+from objects import *
 
 
 class SymbolTable:
@@ -102,6 +102,20 @@ class SymbolTable:
         if not self.function_name:
             self.function_name = name
             return self._new_function(name)
+        
+    def __repr__(self):
+        result = ""
+        for symbol in self.variables.keys():
+            value = self.variables[symbol]
+            if isinstance(value, Function):
+                result += "Function "
+            if isinstance(value, Complex):
+                result += "Complex  "
+            if isinstance(value, Matrix):
+                result += "Matrix   "
+            result += f"{symbol} : {value}"
+            result += "\n"
+        return result
 
 
 symbol_table = SymbolTable()

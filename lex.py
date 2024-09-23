@@ -6,7 +6,7 @@
 #    By: plopez-b <plopez-b@student.42malaga.com    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/09/21 02:27:59 by plopez-b          #+#    #+#              #
-#    Updated: 2024/09/23 02:40:56 by plopez-b         ###   ########.fr        #
+#    Updated: 2024/09/23 04:48:05 by plopez-b         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -38,11 +38,13 @@ tokens = (
     'IDENTIFIER',
     # RESERVED WORDS
     'IMAGINARY',
+    'SYMBOLS',
 )
 
 # Reserved words 
 reserved = {
     'i' : 'IMAGINARY',
+    'symbols': "SYMBOLS",
 }
 
 # Regular expression rules for simple tokens

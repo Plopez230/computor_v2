@@ -23,8 +23,16 @@ def p_sentence(p):
     sentence    :   assig
                 |   value
                 |   eval
+                |   func_symbols
     '''
     p[0] = p[1]
+    return p
+
+def p_func_symbols(p):
+    '''
+    func_symbols    :   SYMBOLS
+    '''
+    p[0] = str(symbol_table)
     return p
 
 def p_assig(p):

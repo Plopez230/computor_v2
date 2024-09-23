@@ -6,7 +6,7 @@
 #    By: plopez-b <plopez-b@student.42malaga.com    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/09/21 17:25:26 by plopez-b          #+#    #+#              #
-#    Updated: 2024/09/23 04:40:20 by plopez-b         ###   ########.fr        #
+#    Updated: 2024/09/23 04:56:09 by plopez-b         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -222,6 +222,7 @@ class Matrix(TreeNode):
             
     def check_shape(self):
         self.cols = None
+        self.rows = len(self.c)
         for row in self.c:
             if self.cols == None:
                 self.cols = len(row)
