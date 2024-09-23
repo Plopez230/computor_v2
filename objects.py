@@ -6,7 +6,7 @@
 #    By: plopez-b <plopez-b@student.42malaga.com    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/09/21 17:25:26 by plopez-b          #+#    #+#              #
-#    Updated: 2024/09/22 07:02:06 by plopez-b         ###   ########.fr        #
+#    Updated: 2024/09/23 03:09:32 by plopez-b         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -18,11 +18,32 @@ class MathError(Exception):
     pass
 
 
-class Complex:
+def join_sum_terms(terms):
+    result = ""
+    for term in terms:
+        if not term.startswith("-") and result != "":
+            result += " + "
+        else:
+            result += " "
+        result += term
+    return result.lstrip()
+
+
+class TreeNode:
+
+    def __init__(self):
+        self.name = None
+        self.is_function = False
+        self.is_variable = False
+        self.is_defined = True
+
+
+class Complex(TreeNode):
     
     def __init__(self, real, imaginary):
-        self.r = round(real, 8)
-        self.i = round(imaginary, 8)
+        super().__init__()
+        self.r = real
+        self.i = imaginary
 
     def __eq__(self, other):
         if isinstance(other, Complex):
@@ -37,6 +58,8 @@ class Complex:
         return False
 
     def eval(self, value):
+        if not value.is_variable:
+            self.is_function = False
         return self
     
     def as_function(self):
@@ -145,20 +168,37 @@ class Complex:
         type = other.__class__.__name__
         raise MathError(f"Invalid operation '**' between Complex and {type}")
         
-    def __repr__(self):
-        if self.i != 0 and self.r != 0:
-            return f"{self.r} + {self.i} * i"
-        if self.i != 0:
-            return f"{self.i} * i"
+    def print_terms(self):
+        terms = 0
         if self.r != 0:
-            return f"{self.r}"
-        else:
-            return f"{self.r}"
+            terms += 1
+        if self.i != 0:
+            terms += 1
+        return max(terms, 1)
+    
+    def __repr__(self):
+        terms = []
+        if self.r != 0:
+            t = ""
+            if self.r < 0:
+                t += "- "
+            t += f"{abs(self.r)}"
+            terms.append(t.lstrip())
+        if self.i != 0:
+            t = ""
+            if self.i < 0:
+                t += "- "
+            if abs(self.i) != 1:
+                t += f"{abs(self.i)} * "
+            t += "i"
+            terms.append(t.lstrip())
+        return join_sum_terms(terms).lstrip()
 
 
-class Matrix:
+class Matrix(TreeNode):
 
     def __init__(self, contents):
+        super().__init__()
         self.c = contents
         self.check_shape()
 
@@ -166,6 +206,8 @@ class Matrix:
         return Function(self)
 
     def eval(self, value):
+        if not value.is_variable:
+            self.is_function = False
         contents = []
         for row in self.c:
             r = []
@@ -174,6 +216,14 @@ class Matrix:
             contents.append(r)
         return Matrix(contents)
             
+    def check_shape(self):
+        self.cols = None
+        for row in self.c:
+            if self.cols == None:
+                self.cols = len(row)
+            if self.cols != len(row):
+                raise MathError("Invalid shape")
+    
     def check_elements(self):
         self.type = None
         for row in self.c:
@@ -337,9 +387,10 @@ class Matrix:
         return str(self.c)
 
 
-class Function:
+class Function(TreeNode):
 
-    def __init__(self, value):
+    def __init__(self, value = None):
+        super().__init__()
         self.value = value
 
     def as_function(self):
@@ -387,6 +438,8 @@ class Function:
         return Mod(self, other.as_function())
     
     def eval(self, value):
+        if not value.is_variable:
+            self.is_function = False
         return self.value.eval(value)
     
     def __repr__(self):
@@ -414,10 +467,13 @@ class Function:
 class Add(Function):
 
     def __init__(self, first, second):
+        super().__init__()
         self.first = first
         self.second = second
 
     def eval(self, value):
+        if not value.is_variable:
+            self.is_function = False
         return self.first.eval(value) + self.second.eval(value)
     
     def __repr__(self):
@@ -427,10 +483,13 @@ class Add(Function):
 class Sub(Function):
 
     def __init__(self, first, second):
+        super().__init__()
         self.first = first
         self.second = second
 
     def eval(self, value):
+        if not value.is_variable:
+            self.is_function = False
         return self.first.eval(value) + self.second.eval(value)
     
     def __repr__(self):
@@ -440,10 +499,13 @@ class Sub(Function):
 class Mul(Function):
 
     def __init__(self, first, second):
+        super().__init__()
         self.first = first
         self.second = second
 
     def eval(self, value):
+        if not value.is_variable:
+            self.is_function = False
         return self.first.eval(value) * self.second.eval(value)
     
     def __repr__(self):
@@ -453,10 +515,13 @@ class Mul(Function):
 class Div(Function):
 
     def __init__(self, first, second):
+        super().__init__()
         self.first = first
         self.second = second
 
     def eval(self, value):
+        if not value.is_variable:
+            self.is_function = False
         return self.first.eval(value) / self.second.eval(value)
     
     def __repr__(self):
@@ -466,10 +531,13 @@ class Div(Function):
 class Pow(Function):
 
     def __init__(self, first, second):
+        super().__init__()
         self.first = first
         self.second = second
 
     def eval(self, value):
+        if not value.is_variable:
+            self.is_function = False
         return self.first.eval(value) ** self.second.eval(value)
     
     def __repr__(self):
@@ -479,10 +547,13 @@ class Pow(Function):
 class Mod(Function):
 
     def __init__(self, first, second):
+        super().__init__()
         self.first = first
         self.second = second
 
     def eval(self, value):
+        if not value.is_variable:
+            self.is_function = False
         return self.first.eval(value) % self.second.eval(value)
     
     def __repr__(self):
@@ -492,13 +563,22 @@ class Mod(Function):
 class Polynomial(Function):
 
     def __init__(self, t = None):
+        super().__init__()
         self.t = t or []
+        self.remove_zeros()
 
     def _get_term(self, terms, _exp):
         for term in terms:
             if term[0] == _exp:
                 return term
         return None
+    
+    def remove_zeros(self):
+        terms = []
+        for term in self.t:
+            if term[0] != Complex(0, 0) or term[1] != Complex(0, 0):
+                terms.append(term)
+        self.t = terms
 
     def add(self, pol):
         terms = deepcopy(self.t)
@@ -515,7 +595,7 @@ class Polynomial(Function):
         for term in pol.t:
             t = self._get_term(terms, term[0])
             if not t:
-                terms.append(term)
+                terms.append([term[0], -term[1]])
             else:
                 t[1] = t[1] - term[1]
         return Polynomial(t = terms)
@@ -540,11 +620,27 @@ class Polynomial(Function):
         for x in range(i - 1):
             res = self.mul(res)
         return res
+    
+    def can_compose(self):
+        if len(self.t) > 1:
+            return True
+        if len(self.t) == 1 and self.t[0][0] != Complex(0, 0):
+            return True
+        return False
 
     def eval(self, value):
-        result = Complex(0, 0)
+        if not value.is_variable:
+            self.is_function = False
+        if isinstance(value, Function) and not self.can_compose():
+            return self
+        result = None
         for term in self.t:
-            result += term[1] * value ** term[0]
+            if not result:
+                t = term[1] * value ** term[0]
+                result = t
+            else:
+                t = term[1] * value ** term[0]
+                result += t
         return result
     
     def _repr_term(self, term):
@@ -552,22 +648,30 @@ class Polynomial(Function):
         e = term[0]
         r = []
         if c != Complex(1, 0):
-            r.append(f"{c}")
+            if (c.print_terms() > 1):
+                r.append(f"({c})")
+            else:
+                r.append(f"{c}")
         if e != Complex(1, 0) and e != Complex(0, 0):
-            r.append(f"x^{e}")
+            if (e.print_terms() > 1):
+                r.append(f"x^({e})")
+            else:
+                r.append(f"x^{e}")
         elif e != Complex(0, 0):
             r.append("x")
         if not r:
-            r = ["1"]
+            r = ["1.0"]
         return " * ".join(r)
 
     def __repr__(self):
         sorted = deepcopy(self.t)
         sorted.sort(key=lambda x: -x[0])
         terms = [self._repr_term(term) for term in sorted]
-        return " + ".join(terms)
+        return join_sum_terms(terms)
     
     def with_par(self, parent):
-        if len(self.t) == 1 and (self.t[0][0] == Complex(1, 0) or self.t[0][1] == Complex(0, 0)):
-            return str(self)
-        return f"({str(self)})"
+        s = str(self)
+        if " " in s:
+            return f"({s})"
+        return s
+    

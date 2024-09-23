@@ -6,7 +6,7 @@
 #    By: plopez-b <plopez-b@student.42malaga.com    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/09/21 02:27:59 by plopez-b          #+#    #+#              #
-#    Updated: 2024/09/22 01:31:11 by plopez-b         ###   ########.fr        #
+#    Updated: 2024/09/23 02:40:56 by plopez-b         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -32,18 +32,17 @@ tokens = (
     # PUNCTUATION
     'SEMICOLON',
     'COMMA',
+    'QUESTION',
     # LITERALS
     'RATIONAL',
     'IDENTIFIER',
     # RESERVED WORDS
     'IMAGINARY',
-    'TYPE',
 )
 
 # Reserved words 
 reserved = {
     'i' : 'IMAGINARY',
-    'type': 'TYPE',
 }
 
 # Regular expression rules for simple tokens
@@ -62,6 +61,7 @@ t_LBRACK        = r'\['
 t_RBRACK        = r'\]'
 t_SEMICOLON     = r'\;'
 t_COMMA         = r'\,'
+t_QUESTION      = r'\?'
 
 def t_RATIONAL(t):
     r'([0-9]+[.]?[0-9]*)|([0-9]*[.]?[0-9]+)'

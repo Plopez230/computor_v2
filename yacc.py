@@ -4,136 +4,204 @@ import ply.yacc as yacc
 
 # Get the token map from the lexer.  This is required.
 from lex import tokens
-from objects import Complex, Matrix, Function, Polynomial, MathError
+from objects import TreeNode, Complex, Matrix, Function, Polynomial, MathError
 
 
 class SyntaxError(Exception):
     pass
 
 
-variables = {}
-function_variable = None
+class SymbolTable:
+
+    def __init__(self):
+        self.variables = {}
+        self.variable_name = None
+        self.function_name = None
+        self.assignment_read = False
+
+    def assign(self, name, value):
+        self.variables[name] = value
+
+    def new_line(self):
+        self.variable_name = None
+        self.function_name = None
+        self.assignment_read = False
+
+    def assignment(self):
+        self.assignment_read = True
+
+    def variable(self, name):
+        if self.assignment_read:
+            return self._value_or_variable(name)
+        return self._value_or_declare(name)
+
+    def function(self, name):
+        if self.assignment_read:
+            return self._function_or_error(name)
+        return self._function_or_declare(name)
+
+    def is_defined(self, v):
+        if not v.is_defined:
+            raise SyntaxError(f"Undefined symbol: {v.name}")
+
+    def can_assign(self, o):
+        return o.is_function or o.is_variable
+    
+    def _new_variable(self, name):
+        value = Polynomial([[Complex(1, 0), Complex(1, 0)]])
+        value.name = name
+        value.is_variable = True
+        value.is_defined = False
+        return value
+    
+    def _existing_variable(self, name):
+        value = self.variables[name]
+        value.name = name
+        value.is_variable = True
+        return value
+        
+    def _new_function(self, name):
+        value = Complex(0, 0)
+        value.name = name
+        value.is_function = True
+        value.is_defined = False
+        return value
+    
+    def _existing_function(self, name):
+        value = self.variables[name]
+        value.name = name
+        value.is_function = True
+        return value
+
+    def _value_or_variable(self, name):
+        if name in self.variables:
+            return self._existing_variable(name)
+        if name == self.variable_name:
+            return self._new_variable(name)
+        raise SyntaxError(f"Undefined symbol: {name}")
+
+    def _value_or_declare(self, name):
+        if name in self.variables:
+            return self._existing_variable(name)
+        if not self.variable_name:
+            self.variable_name = name
+            return self._new_variable(name)
+        raise SyntaxError(f"Undefined symbol: {name}")
+
+    def _function_or_error(self, name):
+        if name in self.variables:
+            return self._existing_function(name)
+        raise SyntaxError(f"Undefined symbol: {name}")
+        
+    def _function_or_declare(self, name):
+        if name in self.variables:
+            return self._existing_function(name)
+        if not self.function_name:
+            self.function_name = name
+            return self._new_function(name)
+
+
+symbol_table = SymbolTable()
+
+precedence = (
+    ('left', "QUESTION"),
+    ('left', "ASSIGNMENT"),
+    ('left', "PLUS", "MINUS"),
+    ('left', "MODULUS"),
+    ('left', "TIMES", "DIVIDE"),
+    ('left', "POWER", "TIMESMATRIX", "POWERMATRIX"),
+    ('right', "UMINUS"),
+)
 
 def p_sentence(p):
     '''
     sentence    :   assig
-    sentence    :   expr_1
-    sentence    :   type_sent
+                |   value
+                |   eval
     '''
     p[0] = p[1]
     return p
 
-def p_type(p):
+def p_assig(p):
     '''
-    type_sent   :   TYPE LPAREN expr_1 RPAREN
+    assig       :   expr r_assign expr
     '''
-    p[0] = p[3].__class__.__name__
-    return p
-
-def p_assignment(p):
-    '''
-    assig       :   name ASSIGNMENT expr_1
-    '''
-    global function_variable
-    function_variable = None
-    variables[p[1]] = p[3]
+    if symbol_table.can_assign(p[1]):
+        symbol_table.assign(p[1].name, p[3])
     p[0] = p[3]
     return p
 
-def p_name_variable(p):
+def p_value(p):
     '''
-    name        :   IDENTIFIER
+    value       :   expr r_assign QUESTION
     '''
+    symbol_table.is_defined(p[1])
     p[0] = p[1]
     return p
 
-def p_name_function(p):
+def p_eval(p):
     '''
-    name        :   IDENTIFIER LPAREN IDENTIFIER RPAREN
+    eval        :   expr r_assign expr QUESTION
     '''
-    global function_variable
-    function_variable = p[3]
+    symbol_table.is_defined(p[1])
     p[0] = p[1]
     return p
 
-def p_expression_reductions(p):
+def p_r_assign(p):
     '''
-    expr_1      :   expr_2
-    expr_2      :   expr_3
-    expr_3      :   expr_4
-    expr_4      :   expr_5
-    expr_5      :   expr_6
+    r_assign    :   ASSIGNMENT
     '''
-    p[0] = p[1]
-    return p
-
-def p_expression_imaginary(p):
-    '''
-    expr_6      :   IMAGINARY
-    '''
-    p[0] = Complex(0, 1)
+    symbol_table.assignment()
     return p
 
 def p_expression_identifier(p):
     '''
-    expr_6      :   IDENTIFIER
+    expr      :   IDENTIFIER
     '''
-    global function_variable
-    if p[1] == function_variable:
-        p[0] = Polynomial(t=[[Complex(1, 0), Complex(1, 0)]])
-    elif p[1] in variables:
-        p[0] = variables[p[1]]
-    else:
-        raise SyntaxError(f"Variable '{p[1]}' does not exist")
+    value = symbol_table.variable(p[1])
+    p[0] = value
     return p
 
 def p_expression_function(p):
     '''
-    expr_6      :   IDENTIFIER LPAREN IDENTIFIER RPAREN
-                |   IDENTIFIER LPAREN expr_1 RPAREN
+    expr      :   IDENTIFIER LPAREN expr RPAREN
     '''
-    if p[1] not in variables:
-        raise SyntaxError(f"Function '{p[1]}' does not exist")
-    function = variables[p[1]]
-    
-    if isinstance(p[3], str):
-        global function_variable
-        if p[3] == function_variable:
-            p[0] = Function()
-        elif p[3] in variables:
-            p[0] = variables[p[3]]
-        else:
-            raise SyntaxError(f"Variable '{p[3]}' does not exist")
+    function = symbol_table.function(p[1])
+    value = function.eval(p[3])
+    p[0] = value
+    return p
 
-    if isinstance(p[3], Complex):
-        p[0] = function.eval(p[3])
-    
+def p_expression_imaginary(p):
+    '''
+    expr      :   IMAGINARY
+    '''
+    p[0] = Complex(0, 1)
     return p
 
 def p_expression_rational(p):
     '''
-    expr_6      :   RATIONAL
+    expr      :   RATIONAL
     '''
     p[0] = Complex(p[1], 0)
     return p
 
 def p_unary_operations(p):
     '''
-    expr_5      :   MINUS expr_5
+    expr        :   MINUS expr %prec UMINUS
     '''
     p[0] = -p[2]
     return p
 
 def p_binary_operations(p):
     '''
-    expr_1      :   expr_1 PLUS expr_2
-                |   expr_1 MINUS expr_2
-    expr_2      :   expr_2 MODULUS expr_3
-    expr_3      :   expr_3 TIMES expr_4
-                |   expr_3 DIVIDE expr_4
-    expr_4      :   expr_4 POWER expr_5
-                |   expr_4 TIMESMATRIX expr_5
-                |   expr_4 POWERMATRIX expr_5
+    expr        :   expr PLUS expr
+                |   expr MINUS expr
+                |   expr MODULUS expr
+                |   expr TIMES expr
+                |   expr DIVIDE expr
+                |   expr POWER expr
+                |   expr TIMESMATRIX expr
+                |   expr POWERMATRIX expr
     '''
     if p[2] == '+':
         p[0] = p[1] + p[3]
@@ -154,12 +222,12 @@ def p_binary_operations(p):
     return p
 
 def p_factor_expr(p):
-    'expr_6     :   LPAREN expr_1 RPAREN'
+    'expr     :   LPAREN expr RPAREN'
     p[0] = p[2]
     return p
 
 def p_factor_matrix(p):
-    'expr_6     :   LBRACK vec_list RBRACK'
+    'expr     :   LBRACK vec_list RBRACK'
     p[0] = Matrix(p[2])
     return p
 
@@ -180,7 +248,7 @@ def p_matrix_list_1(p):
 
 def p_expr_list_n(p):
     '''
-    expr_list   :   expr_1 COMMA expr_list
+    expr_list   :   expr COMMA expr_list
     '''
     p[0] = p[3]
     p[0].insert(0, p[1])
@@ -188,15 +256,14 @@ def p_expr_list_n(p):
 
 def p_expr_list_1(p):
     '''
-    expr_list   :   expr_1
+    expr_list   :   expr
     '''
     p[0] = [p[1]]
     return p
 
 # Error rule for syntax errors
 def p_error(p):
-    msg = f"  {' ' * p.lexpos}^\n"
-    msg += f"Syntax error: {p.value}"
+    msg = f"Syntax error."
     raise SyntaxError(msg)
 
 # Build the parser
@@ -209,11 +276,13 @@ while True:
         break
     if not s: continue
     try:
+        symbol_table.new_line()
         result = parser.parse(s)
         print(result)
     except SyntaxError as e:
         print (f"\033[1;31m{e}\033[0m")
+    '''
     except MathError as e:
         print (f"\033[1;31mMath error: {e}\033[0m")
     except ZeroDivisionError as e:
-        print (f"\033[1;31mDivision by 0\033[0m")
+        print (f"\033[1;31mDivision by 0\033[0m")'''
