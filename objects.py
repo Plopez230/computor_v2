@@ -6,7 +6,7 @@
 #    By: plopez-b <plopez-b@student.42malaga.com    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/09/21 17:25:26 by plopez-b          #+#    #+#              #
-#    Updated: 2024/09/23 04:56:09 by plopez-b         ###   ########.fr        #
+#    Updated: 2024/09/23 15:28:50 by plopez-b         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -426,13 +426,17 @@ class Function(TreeNode):
         return Mul(self, other.as_function())
 
     def __truediv__(self, other):
+        if isinstance(other, Complex) and other == Complex(1, 0):
+            return self
         if isinstance(self, Polynomial):
             if isinstance(other, Complex):
                 other = Polynomial(t = [[Complex(0, 0), other]])
-                return self.mul(other)
+                return self.div(other)
         return Div(self, other.as_function())
 
     def __pow__(self, other):
+        if isinstance(other, Complex) and other == Complex(1, 0):
+            return self
         if isinstance(self, Polynomial):
             if isinstance(other, Complex):
                 if other.is_integer():
