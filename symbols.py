@@ -6,7 +6,7 @@
 #    By: plopez-b <plopez-b@student.42malaga.com    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/09/23 04:32:33 by plopez-b          #+#    #+#              #
-#    Updated: 2024/09/23 04:51:54 by plopez-b         ###   ########.fr        #
+#    Updated: 2024/09/24 03:40:01 by plopez-b         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -47,7 +47,8 @@ class SymbolTable:
             raise SyntaxError(f"Undefined symbol: {v.name}")
 
     def can_assign(self, o):
-        return o.is_function or o.is_variable
+        if not o.is_function and not o.is_variable:
+            raise SyntaxError("Can't assign value to expression")
     
     def _new_variable(self, name):
         set_variable(name)

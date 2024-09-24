@@ -6,7 +6,7 @@
 #    By: plopez-b <plopez-b@student.42malaga.com    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/09/23 14:26:08 by plopez-b          #+#    #+#              #
-#    Updated: 2024/09/24 03:23:10 by plopez-b         ###   ########.fr        #
+#    Updated: 2024/09/24 03:44:22 by plopez-b         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -51,8 +51,8 @@ def p_assig(p):
     '''
     assig       :   expr r_assign expr
     '''
-    if symbol_table.can_assign(p[1]):
-        symbol_table.assign(p[1].name, p[3])
+    symbol_table.can_assign(p[1])
+    symbol_table.assign(p[1].name, p[3])
     p[0] = p[3]
     return p
 
@@ -93,10 +93,11 @@ def p_expression_function(p):
     '''
     function = symbol_table.function(p[1])
     value = function.eval(p[3])
-    value.is_defined = function.is_defined
-    value.is_function = function.is_function
-    value.is_variable = function.is_variable
-    value.name = function.name
+    if p[3].is_variable:
+        value.is_defined = function.is_defined
+        value.is_function = function.is_function
+        value.is_variable = function.is_variable
+        value.name = function.name
     p[0] = value
     return p
 
