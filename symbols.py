@@ -6,7 +6,7 @@
 #    By: plopez-b <plopez-b@student.42malaga.com    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/09/23 04:32:33 by plopez-b          #+#    #+#              #
-#    Updated: 2024/09/24 03:40:01 by plopez-b         ###   ########.fr        #
+#    Updated: 2024/09/24 04:06:03 by plopez-b         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -61,6 +61,7 @@ class SymbolTable:
     def _existing_variable(self, name):
         value = self.variables[name]
         value.name = name
+        value.is_defined = True
         value.is_variable = True
         return value
         

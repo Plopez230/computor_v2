@@ -6,7 +6,7 @@
 #    By: plopez-b <plopez-b@student.42malaga.com    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/09/21 17:25:26 by plopez-b          #+#    #+#              #
-#    Updated: 2024/09/23 15:28:50 by plopez-b         ###   ########.fr        #
+#    Updated: 2024/09/24 04:25:33 by plopez-b         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -645,10 +645,16 @@ class Polynomial(Function):
         result = None
         for term in self.t:
             if not result:
-                t = term[1] * value ** term[0]
+                if term[0] == Complex(0, 0):
+                    t = Polynomial([term])
+                else:
+                    t = term[1] * value ** term[0]
                 result = t
             else:
-                t = term[1] * value ** term[0]
+                if term[0] == Complex(0, 0):
+                    t = Polynomial([term])
+                else:
+                    t = term[1] * value ** term[0]
                 result += t
         return result
     

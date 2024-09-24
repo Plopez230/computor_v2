@@ -6,7 +6,7 @@
 #    By: plopez-b <plopez-b@student.42malaga.com    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/09/23 14:26:08 by plopez-b          #+#    #+#              #
-#    Updated: 2024/09/24 03:44:22 by plopez-b         ###   ########.fr        #
+#    Updated: 2024/09/24 03:50:47 by plopez-b         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -94,6 +94,8 @@ def p_expression_function(p):
     function = symbol_table.function(p[1])
     value = function.eval(p[3])
     if p[3].is_variable:
+        if p[3].name == function.name:
+            raise SyntaxError("Malformed expression")
         value.is_defined = function.is_defined
         value.is_function = function.is_function
         value.is_variable = function.is_variable
