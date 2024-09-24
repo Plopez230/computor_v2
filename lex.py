@@ -6,11 +6,12 @@
 #    By: plopez-b <plopez-b@student.42malaga.com    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/09/21 02:27:59 by plopez-b          #+#    #+#              #
-#    Updated: 2024/09/23 04:48:05 by plopez-b         ###   ########.fr        #
+#    Updated: 2024/09/24 05:03:14 by plopez-b         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 import ply.lex as lex
+from exceptions import *
 
 # List of token names.   This is always required
 tokens = (
@@ -86,8 +87,8 @@ t_ignore  = ' \t'
 
 # Error handling rule
 def t_error(t):
-    print("Illegal character '%s'" % t.value[0])
-    t.lexer.skip(1)
+    c = t.value[0]
+    raise SyntaxError(f"Illegal character: {c}")
 
 # Build the lexer
 lexer = lex.lex()

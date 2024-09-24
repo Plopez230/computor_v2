@@ -6,7 +6,7 @@
 #    By: plopez-b <plopez-b@student.42malaga.com    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/09/23 04:32:33 by plopez-b          #+#    #+#              #
-#    Updated: 2024/09/24 04:06:03 by plopez-b         ###   ########.fr        #
+#    Updated: 2024/09/24 05:09:52 by plopez-b         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -108,6 +108,8 @@ class SymbolTable:
     def __repr__(self):
         result = ""
         for symbol in self.variables.keys():
+            if result:
+                result += "\n"
             value = self.variables[symbol]
             if isinstance(value, Function):
                 result += "Function "
@@ -116,7 +118,6 @@ class SymbolTable:
             if isinstance(value, Matrix):
                 result += "Matrix   "
             result += f"{symbol} : {value}"
-            result += "\n"
         return result
 
 

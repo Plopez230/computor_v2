@@ -6,7 +6,7 @@
 #    By: plopez-b <plopez-b@student.42malaga.com    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/09/23 14:26:08 by plopez-b          #+#    #+#              #
-#    Updated: 2024/09/24 03:50:47 by plopez-b         ###   ########.fr        #
+#    Updated: 2024/09/24 04:35:31 by plopez-b         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -200,20 +200,3 @@ def p_error(p):
 
 # Build the parser
 parser = yacc.yacc()
-
-while True:
-    try:
-        s = input('> ')
-    except EOFError:
-        break
-    if not s: continue
-    try:
-        symbol_table.new_line()
-        result = parser.parse(s)
-        print(result)
-    except SyntaxError as e:
-        print (f"\033[1;31m{e}\033[0m")
-    except MathError as e:
-        print (f"\033[1;31mMath error: {e}\033[0m")
-    except ZeroDivisionError as e:
-        print (f"\033[1;31mDivision by 0\033[0m")
